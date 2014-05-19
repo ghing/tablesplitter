@@ -1,2 +1,4 @@
 pillow
 blinker
+peewee
+six

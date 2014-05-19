@@ -1,6 +1,10 @@
 import hashlib
 from functools import partial
 import os.path
+import re
+from unicodedata import normalize
+
+import six
 
 from PIL import ImageOps
 
@@ -53,3 +57,16 @@ def md5sum(filename):
         for buf in iter(partial(f.read, 128), b''):
             d.update(buf)
     return d.hexdigest()
+
+_punct_re = re.compile(r'[\t !"#$%&\'()*\-/<=>?@\[\\\]^_`{|},.]+')
+
+# Slugify snipped by Armin Ronacher
+# Source: http://flask.pocoo.org/snippets/5/
+def slugify(text, delim=six.u('-')):
+    """Generates an slightly worse ASCII-only slug."""
+    result = []
+    for word in _punct_re.split(text.lower()):
+        word = normalize('NFKD', word)
+        if word:
+            result.append(word)
+    return six.text_type(delim.join(result))
