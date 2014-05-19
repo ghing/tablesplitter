@@ -3,11 +3,10 @@ import os.path
 import re
 import subprocess
 
-from blinker import signal
-
 from tablesplitter.conf import settings
 from tablesplitter.command.base import BaseCommand
 from tablesplitter.models import Project, File, ImageFile
+from tablesplitter.signal import extract_image
 from tablesplitter.util import md5sum
 
 def output_prefix(input_filename, output_dir):
@@ -34,11 +33,9 @@ def pdf_to_images(input_filename, output_dir, first=None, last=None):
 
     subprocess.check_call(cmd_args)
 
-extract_image = signal('extract_image')
-
 @extract_image.connect
-def image_extracted(sender, input_filename, input_md5, output_filename,
-        output_md5, page, project=None):
+def image_extracted(sender, input_filename, input_md5, filename,
+        md5, page, project=None):
     try:
         project_obj = Project.get(Project.slug == project)
     except Project.DoesNotExist:
@@ -50,7 +47,7 @@ def image_extracted(sender, input_filename, input_md5, output_filename,
         input_file = File.create(md5=input_md5, filename=input_filename,
             project=project_obj)
 
-    ImageFile.create(md5=output_md5, filename=output_filename,
+    ImageFile.create(md5=md5, filename=filename,
         source=input_file, page=page)
 
 
@@ -89,5 +86,5 @@ class Command(BaseCommand):
             output_md5 = md5sum(fname)
             page_num = self.page_num(output_filename)
             extract_image.send(self, input_filename=input_filename_base,
-                input_md5=input_md5, output_filename=output_filename,
-                output_md5=output_md5, page=page_num, project=project)
+                input_md5=input_md5, filename=output_filename,
+                md5=output_md5, page=page_num, project=project)

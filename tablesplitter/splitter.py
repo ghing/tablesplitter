@@ -1,24 +1,24 @@
 import math
 import os
+import os.path
+
+from six.moves import range
 
 from PIL import Image, ImageOps, ImageFilter
 
-try:
-    from blinker import signal
-except ImportError:
-    signal = None
-
+from tablesplitter.signal import split_image
 from tablesplitter.util import (bufrange, threshold, getbbox_invert,
-    merge_proximate, cell_basename)
+    merge_proximate, cell_basename, md5sum)
 
 
 class TableSplitterBase(object):
     transforms = {}
     span_map = {}
 
-    def __init__(self, f, filename):
-        self.filename = filename
-        self._im = Image.open(f)
+    def __init__(self, filename):
+        self.md5 = md5sum(filename)
+        self.filename = os.path.basename(filename)
+        self._im = Image.open(filename)
 
     @property
     def im(self):
@@ -72,11 +72,12 @@ class TableSplitterBase(object):
         return boxes
 
     def _get_cell_box(self, cellx_start, celly_start, cellx_end, celly_end,
-            vlines, hlines):
+        vlines, hlines):
         upper_left_x = vlines[cellx_start]
         upper_left_y = hlines[celly_start]
         lower_right_x = vlines[cellx_end + 1]
         lower_right_y = hlines[celly_end + 1]
+                    
         return (upper_left_x, upper_left_y, lower_right_x, lower_right_y)
 
     def _mark_seen(self, seen, start_col, start_row, end_col, end_row):
@@ -91,14 +92,15 @@ class TableSplitterBase(object):
             region = self.im.crop((left, upper, right, lower))
             region = self.transform(region, col, row)
             # Increase contrast.  Whiteish regions become absolute white
-            region = threshold(200)
+            region = threshold(region, 200)
             output_filename = cell_basename(self.filename, col, row) + ".tiff"
             output_path = os.path.join(output_dir, output_filename)
             region.save(output_path)
-            if signal is not None:
-                split_signal = signal('image_split')
-                split_signal.send(self, input_filename=self.filename,
-                    filename=output_filename, col=col, row=row)
+            md5 = md5sum(output_path)
+            split_image.send(self, input_filename=self.filename,
+                input_md5=self.md5, filename=output_filename, md5=md5,
+                column=col, row=row)
+               
 
 
 class MSTableSplitter(TableSplitterBase):
@@ -156,10 +158,10 @@ class MSTableSplitter(TableSplitterBase):
         if min_length is None:
             min_length = math.floor((endx - startx) * 0.5)
 
-        for y in xrange(starty, endy):
+        for y in range(starty, endy):
             num_running = 0
             num_skipped = 0
-            for x in xrange(startx, endx):
+            for x in range(startx, endx):
                 c = im.getpixel((x, y))
                 if c == 0:
                     num_running += 1

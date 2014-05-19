@@ -2,7 +2,7 @@
 Signals
 =======
 
-image_split
+split_image
 ===========
 
 Sent when a cell image is extacted from an image containing a table
@@ -10,8 +10,10 @@ Sent when a cell image is extacted from an image containing a table
 *Arguments*:
 
    * input_filename
+   * input_md5
    * filename
-   * col
+   * md5
+   * column
    * row
 
 extract_image
@@ -23,7 +25,7 @@ Sent when an image is extracted from a PDF
 
     * input_filename
     * input_md5
-    * output_filename
-    * output_md5
+    * filename
+    * md5
     * page
     * project

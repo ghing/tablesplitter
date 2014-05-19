@@ -46,8 +46,8 @@ def bufrange(center, minval, maxval, size):
     start = start if start >= minval else minval
     end = center + size
     end = end if end < maxval else maxval
-    r = range(start, center)
-    r.extend(range(center + 1, end + 1))
+    r = [i for i in range(start, center)]
+    r.extend([i for i in range(center + 1, end + 1)])
     return r
 
 

@@ -1,8 +1,23 @@
 from tablesplitter.command.base import SplitterCommand
 
 from tablesplitter.conf import settings
-
+from tablesplitter.models import ImageFile, SplitFile
 from tablesplitter.splitter import MSTableSplitter
+from tablesplitter.signal import split_image
+
+
+@split_image.connect
+def image_split(sender, **kwargs): 
+    input_md5 = kwargs.get('input_md5')
+    filename = kwargs.get('filename')
+    md5 = kwargs.get('md5')
+    column = kwargs.get('column')
+    row = kwargs.get('row')
+
+    source = ImageFile.get(ImageFile.md5 == input_md5)
+    SplitFile.create(filename=filename, md5=md5, source=source,
+        row=row, column=column)
+
 
 class Command(SplitterCommand):
     name = 'split_img'
@@ -16,6 +31,6 @@ class Command(SplitterCommand):
             default=settings.SPLIT_DIR)
 
     def run(self, args):
-        with open(args.input_filename, 'r') as f:
-            splitter = MSTableSplitter(f, args.input_filename)
-            splitter.split(args.output_dir)
+        splitter = MSTableSplitter(args.input_filename)
+        splitter.split(args.output_dir, min_length=args.min_hline_length,
+            max_gap=args.max_gap, buf=args.buffer)

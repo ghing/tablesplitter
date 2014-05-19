@@ -30,7 +30,7 @@ class Project(BaseModel):
 
 class File(BaseModel):
     filename = CharField()
-    md5 = CharField(unique=True)
+    md5 = CharField()
     project = ForeignKeyField(Project, null=True)
 
     def __str__(self):
