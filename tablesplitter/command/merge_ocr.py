@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 
-import argparse
 import os
 import os.path
 
 import csv
 
-from util import cell_basename
-from core import NUM_COLS, NUM_ROWS, OUTPUT_CSV_DIR, OCR_DIR
+from tablesplitter.command.base import BaseCommand
+from tablesplitter.conf import settings
+from tablesplitter.util import cell_basename
 
 def merge_ocr(input_filename, num_cols, num_rows, ocr_dir):
     data = []
@@ -41,18 +41,27 @@ def get_output_filename(input_filename, csv_dir):
     base, oldext = os.path.splitext(os.path.basename(input_filename))
     return os.path.join(csv_dir, base + ".csv")
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument("input_filename", action="store")
-    parser.add_argument("--ocr-dir", dest="ocr_dir", action="store",
-        default=OCR_DIR)
-    parser.add_argument("--csv_dir", dest="csv_dir",
-        default=OUTPUT_CSV_DIR)
-    args = parser.parse_args()
-    data = merge_ocr(args.input_filename, NUM_COLS, NUM_ROWS, args.ocr_dir)
-    output_filename = get_output_filename(args.input_filename, args.csv_dir)
 
-    with open(output_filename, 'wb') as f:
-        writer = csv.writer(f)
-        for row in data:
-            writer.writerow(row)
+class Command(BaseCommand):
+    name = 'merge_ocr'
+
+    help = "Merge OCRed text into a single CSV file"
+
+    @classmethod
+    def add_arguments(self, parser):
+        parser.add_argument("input_filename", action="store")
+        parser.add_argument("--cols", type=int)
+        parser.add_argument("--rows", type=int)
+        parser.add_argument("--ocr-dir", dest="ocr_dir", action="store",
+            default=settings.OCR_DIR)
+        parser.add_argument("--csv_dir", dest="csv_dir",
+            default=settings.OUTPUT_CSV_DIR)
+
+    def run(self, args):
+        data = merge_ocr(args.input_filename, args.cols, args.rows, args.ocr_dir)
+        output_filename = get_output_filename(args.input_filename, args.csv_dir)
+
+        with open(output_filename, 'wb') as f:
+            writer = csv.writer(f)
+            for row in data:
+                writer.writerow(row)

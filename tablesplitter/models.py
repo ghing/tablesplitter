@@ -31,6 +31,7 @@ class Project(BaseModel):
 class File(BaseModel):
     filename = CharField()
     md5 = CharField(unique=True)
+    project = ForeignKeyField(Project, null=True)
 
     def __str__(self):
         return "{} ({})".format(self.filename, self.md5)
