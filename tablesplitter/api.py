@@ -2,11 +2,8 @@ from peewee import JOIN_LEFT_OUTER, fn
 from restless.fl import FlaskResource
 from restless.utils import json
 
-
 from tablesplitter.models import SplitFile, Text
 
-# TODO: Pagination. See
-# http://peewee.readthedocs.org/en/latest/peewee/cookbook.html#paginating-records
 
 class ModelResource(FlaskResource):
     def list(self):
@@ -15,6 +12,7 @@ class ModelResource(FlaskResource):
 
     def detail(self, pk):
         return self.model.get(self.model.id == pk)
+
 
 class CellResource(ModelResource):
     fields = {
@@ -29,16 +27,16 @@ class CellResource(ModelResource):
 
     def list(self):
         limit = self.request.args.get('limit', 20)
-        text_lte = self.request.args.get('text_lte')
+        text_lt = self.request.args.get('text_lt')
         random = 'random' in self.request.args
 
         objects = SplitFile.select(SplitFile,
                 fn.Count(Text.id).alias('count')).join(Text,
                         JOIN_LEFT_OUTER).group_by(SplitFile)
 
-        if text_lte is not None:
-            text_lte = int(text_lte)
-            objects = objects.having(fn.Count(Text.id) <= text_lte)
+        if text_lt is not None:
+            text_lt = int(text_lt)
+            objects = objects.having(fn.Count(Text.id) < text_lt)
         if random:
             objects = objects.order_by(fn.Random())
 

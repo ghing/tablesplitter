@@ -1,4 +1,4 @@
-from flask import (Flask, send_from_directory)
+from flask import (Flask, render_template, send_from_directory)
 
 from tablesplitter.conf import settings
 from tablesplitter.api import CellResource, TextResource
@@ -13,6 +13,10 @@ app.config.from_envvar('TABLESPLITTER_SETTINGS_MODULE', silent=True)
 def cell_image(filename):
     return send_from_directory(app.config['SPLIT_DIR'],
         filename)
+
+@app.route('/')
+def index():
+    return render_template('index.html')
 
 CellResource.add_url_rules(app, rule_prefix='/api/cells/')
 TextResource.add_url_rules(app, rule_prefix='/api/text/')
