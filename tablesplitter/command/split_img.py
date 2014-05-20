@@ -13,11 +13,15 @@ def image_split(sender, **kwargs):
     md5 = kwargs.get('md5')
     column = kwargs.get('column')
     row = kwargs.get('row')
+    left = kwargs.get('left')
+    upper = kwargs.get('upper')
+    right = kwargs.get('right')
+    lower = kwargs.get('lower')
 
     source = ImageFile.get(ImageFile.md5 == input_md5)
-    SplitFile.create(filename=filename, md5=md5, source=source,
-        row=row, column=column)
-
+    split = SplitFile.create(filename=filename, md5=md5, source=source,
+        row=row, column=column, left=left, upper=upper, right=right, lower=lower)
+    split.create_png()
 
 class Command(SplitterCommand):
     name = 'split_img'

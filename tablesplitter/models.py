@@ -1,8 +1,11 @@
 from datetime import datetime
+import os.path
 
 from peewee import (Model, SqliteDatabase, CharField, DateTimeField,
                     IntegerField, ForeignKeyField, TextField)
+from PIL import Image
 
+from tablesplitter.conf import settings
 from tablesplitter.util import slugify
 
 db = SqliteDatabase('tablesplitter.db')
@@ -47,6 +50,25 @@ class SplitFile(File):
     source = ForeignKeyField(ImageFile, related_name='cells')
     row = IntegerField()
     column = IntegerField()
+    left = IntegerField()
+    upper = IntegerField()
+    right = IntegerField()
+    lower = IntegerField()
+
+    def create_png(self):
+        inpath = os.path.join(settings.SPLIT_DIR, self.filename)
+        base, ext = os.path.splitext(self.filename)
+        outpath = os.path.join(settings.SPLIT_DIR, base + ".png")
+        Image.open(inpath).save(outpath)
+
+    @property
+    def image_url(self):
+        base, ext = os.path.splitext(self.filename)
+        return settings.IMG_URL_PREFIX + '/' + base + '.png' 
+
+    @property
+    def box(self):
+        return (self.left, self.upper, self.right, self.lower)
 
 class Text(BaseModel):
     METHODS = [

@@ -99,8 +99,8 @@ class TableSplitterBase(object):
             md5 = md5sum(output_path)
             split_image.send(self, input_filename=self.filename,
                 input_md5=self.md5, filename=output_filename, md5=md5,
-                column=col, row=row)
-               
+                column=col, row=row, left=left, upper=upper, right=right,
+                lower=lower)
 
 
 class MSTableSplitter(TableSplitterBase):

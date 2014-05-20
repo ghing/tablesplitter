@@ -1,5 +1,5 @@
 from tablesplitter.command import (initdb, create_project, split_pdf, 
-    detect_cells, split_img, ocr_img, merge_ocr)
+    detect_cells, split_img, ocr_img, merge_ocr, runserver)
 
 class CommandRegistry(dict):
     def register(self, cls):
@@ -14,3 +14,4 @@ registry.register(detect_cells.Command)
 registry.register(split_img.Command)
 registry.register(ocr_img.Command)
 registry.register(merge_ocr.Command)
+registry.register(runserver.Command)

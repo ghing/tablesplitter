@@ -15,6 +15,10 @@ Sent when a cell image is extacted from an image containing a table
 * md5
 * column
 * row
+* left
+* upper
+* right
+* lower
 
 extract_image
 =============
