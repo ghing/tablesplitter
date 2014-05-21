@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row">
+  <div class="col-md-12">
+    <h1>Projects</h1>
+    <ul class="projects">
+      {% for project in projects %}
+      <li class="project">
+        <h2><a href="{{ url_for('project', slug=project.slug) }}">{{ project.name }}</a></h2>
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+</div>
+{% endblock %}

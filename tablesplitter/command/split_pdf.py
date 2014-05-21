@@ -5,7 +5,7 @@ import subprocess
 
 from tablesplitter.conf import settings
 from tablesplitter.command.base import BaseCommand
-from tablesplitter.models import Project, File, ImageFile
+from tablesplitter.models import Project, SourceFile, ImageFile
 from tablesplitter.signal import extract_image
 from tablesplitter.util import md5sum
 
@@ -42,13 +42,15 @@ def image_extracted(sender, input_filename, input_md5, filename,
         project_obj = None
 
     try:
-        input_file = File.get(File.md5 == input_md5, File.project == project_obj) 
-    except File.DoesNotExist:
-        input_file = File.create(md5=input_md5, filename=input_filename,
+        input_file = SourceFile.get(SourceFile.md5 == input_md5, SourceFile.project == project_obj) 
+    except SourceFile.DoesNotExist:
+        input_file = SourceFile.create(md5=input_md5, filename=input_filename,
             project=project_obj)
 
-    ImageFile.create(md5=md5, filename=filename,
+    image = ImageFile.create(md5=md5, filename=filename,
         source=input_file, page=page)
+    image.create_png()
+    image.create_thumbnail_png()
 
 
 class Command(BaseCommand):

@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row">
+  <div class="col-md-12">
+    <h1>{{project.name}}</h1>
+    <h2>Files</h2>
+    <ul class="source-files">
+      {% for f in project.source_files %}
+      <li class="source-file">
+        <h3><a href="{{ url_for('source_file', id=f.id) }}">{{f.filename}}</a></h3>
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+</div>
+{% endblock %}

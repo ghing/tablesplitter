@@ -46,3 +46,21 @@ Sent when text is providef for an image
 * method
 * text
 * user
+
+detect_columns
+==============
+
+*Arguments*:
+
+* filename
+* md5
+* columns
+
+detect_rows
+==============
+
+*Arguments*:
+
+* filename
+* md5
+* rows

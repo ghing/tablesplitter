@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row">
+  <div class="col-md-12">
+    <h1>{{source_file.filename}}</h1>
+    <h2>Files</h2>
+    <ul class="source-files">
+      {% for f in source_file.derivatives|sort(attribute='page') %}
+      <li class="image-file">
+        <h3><a href="{{ url_for('image_file', id=f.id) }}">{{f.filename}}</a>{% if f.page %} (page {{ f.page }}){% endif %}</h3>
+        <a href="{{ f.image_url }}"><img src="{{ f.thumbnail_url }}"></a>
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+</div>
+{% endblock %}

@@ -33,15 +33,24 @@
   });
 
   var CellImageView = TableSplitter.CellImageView = Backbone.View.extend({
-    tagName: 'img',
-
     initialize: function(options) {
       this.collection.on('sync', this.render, this);
     },
 
     render: function() {
-      var cell = this.collection.at(0);
-      this.$el.attr('src', cell.get('image_url'));
+      var cell;
+
+      this.$el.empty();
+
+      if (!this.collection.length) {
+        $("<p>There are no more images</p>").appendTo(this.$el);
+      }
+      else {
+        cell = this.collection.at(0);
+        $('<img>').attr('src', cell.get('image_url'))
+          .appendTo(this.$el);
+      }
+
       return this;
     }
   });
@@ -67,6 +76,10 @@
     handleSubmit: function(evt) {
       evt.preventDefault();
 
+      if (!this.model) {
+        return;
+      }
+
       var text = $('#text').val();
 
       var textObj = this.texts.create({
@@ -83,8 +96,19 @@
     },
 
     updateModel: function() {
-      // @todo: Handle case when there are no more available items
-      this.model = this.collection.at(0);
+      if (this.collection.length) {
+        this.model = this.collection.at(0);
+      }
+      else {
+        this.model = null;
+        this.toggleDisabled();
+      }
+    },
+
+    toggleDisabled: function() {
+      var disabled = this.model ? false : true;
+      this.$('button').prop('disabled', disabled);
+      return this;
     }
   });
 

@@ -6,7 +6,7 @@ from six.moves import range
 
 from PIL import Image, ImageOps, ImageFilter
 
-from tablesplitter.signal import split_image
+from tablesplitter.signal import split_image, detect_rows, detect_columns
 from tablesplitter.util import (bufrange, threshold, getbbox_invert,
     merge_proximate, cell_basename, md5sum)
 
@@ -48,8 +48,12 @@ class TableSplitterBase(object):
     def get_boxes(self, **kwargs):
         hlines = self.get_hlines(**kwargs)
         num_rows = len(hlines) - 1
+        detect_rows.send(self, filename=self.filename, md5=self.md5,
+            rows=num_rows)
         vlines = self.get_vlines(**kwargs) 
         num_cols = len(vlines) - 1
+        detect_columns.send(self, filename=self.filename, md5=self.md5,
+            columns=num_cols)
         seen = [[False for y in range(num_rows)] for x in range(num_cols)]
         boxes = []
 

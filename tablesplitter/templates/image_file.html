@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row">
+  <div class="col-md-12">
+    <h1>{{image_file.filename}}</h1>
+    <a href="{{ image_file.image_url }}"><img src="{{ image_file.thumbnail_url }}"></a>
+    <h2>Cells</h2>
+    <ul class="cells">
+      {% for cell in image_file.cells %}
+      <li class="cell" id="cell-{{ cell.id }}">
+        <h3>Row {{ cell.row }}, Column {{ cell.column }}</h3>
+
+        {% if cell.needs_texts %}
+        <div class="alert alert-warning">This cell needs additional text translations</div>
+        {% endif %}
+
+        {% if cell.needs_review %}
+        <div class="alert alert-warning">This cell needs review</div>
+        {% endif %}
+
+        <img src="{{ cell.image_url }}">
+
+        {% if cell.texts.count %}
+        <h4>Text versions</h4>
+        <ul>
+            {% for text in cell.texts %}
+            <li>{{ text.text }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+</div>
+{% endblock %}

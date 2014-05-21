@@ -1,1 +1,15 @@
 body { padding-top: 70px; }
+
+ul.projects, ul.source-files, ul.cells {
+  padding-left: 0;
+  list-style: none;
+}
+
+.cell {
+  margin-bottom: 10px;
+}
+
+.cell img {
+  display: block;
+  max-width: 100%;
+}
