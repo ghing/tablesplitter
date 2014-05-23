@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Row {{ cell.row }}, Column {{ cell.column }}</h1>
+
+{% if cell.needs_texts %}
+<div class="alert alert-warning">This cell needs additional text translations</div>
+{% endif %}
+
+{% if cell.needs_review %}
+<div class="alert alert-warning">This cell needs review</div>
+{% endif %}
+
+<img src="{{ cell.image_url }}">
+
+<h3>Text versions</h3>
+{% if cell.texts.count %}
+<p>Most common text: {{ cell.most_common_text|first }}</p>
+<ul>
+    {% for text in cell.texts %}
+    <li>{{ text.text }}</li>
+    {% endfor %}
+</ul>
+{% endif %}
+
+<h3 id="add-text">Add text version</h3>
+
+<form method="post" role="form" action="{{ url_for('add_cell_text', id=cell.id) }}">
+  <div class="form-group">
+    <label for="text">Text</label>
+    <input type="text" class="form-control" id="text" name="text">
+  </div>
+  <div class="form-group">
+    <label for="user_id">Your email</label>
+    <input type="text" class="form-control" id="user_id" name="user_id">
+  </div>
+  <button type="submit" class="btn btn-default">Submit</button>
+</form>
+{% endblock %}

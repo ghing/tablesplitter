@@ -20,8 +20,10 @@
 
         <img src="{{ cell.image_url }}">
 
-        {% if cell.texts.count %}
         <h4>Text versions</h4>
+        <p><a href="{{ url_for('cell', id=cell.id) }}#add-text">Add text version</a></p>
+        {% if cell.texts.count %}
+        <p>Most common text: {{ cell.most_common_text|first }}</p>
         <ul>
             {% for text in cell.texts %}
             <li>{{ text.text }}</li>
