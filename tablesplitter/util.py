@@ -66,7 +66,7 @@ def slugify(text, delim=six.u('-')):
     """Generates an slightly worse ASCII-only slug."""
     result = []
     for word in _punct_re.split(text.lower()):
-        word = normalize('NFKD', word)
+        word = normalize('NFKD', six.text_type(word))
         if word:
             result.append(word)
     return six.text_type(delim.join(result))
