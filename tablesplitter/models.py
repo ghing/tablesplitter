@@ -20,7 +20,8 @@ class BaseModel(Model):
 
 class Project(BaseModel):
     name = CharField()
-    slug = CharField(null=True)
+    slug = CharField()
+    instructions = TextField(default="")
 
     def save(self, **kwargs):
         if self.slug is None:
@@ -42,6 +43,7 @@ class File(BaseModel):
 
 class SourceFile(File):
     project = ForeignKeyField(Project, related_name='source_files', null=True)
+    instructions = TextField(default="")
 
 
 class WebImageMixin(object):
@@ -133,8 +135,11 @@ class SplitFile(WebImageMixin, File):
 
     @property
     def most_common_text(self):
-        text_dict = self.distinct_texts.order_by(fn.Count(Text.text).desc())[0]
-        return text_dict['text'], text_dict['count'] 
+        try:
+            text_dict = self.distinct_texts.order_by(fn.Count(Text.text).desc())[0]
+            return text_dict['text'], text_dict['count'] 
+        except IndexError:
+            return None
 
     @property
     def needs_review(self):
