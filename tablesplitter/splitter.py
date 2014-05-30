@@ -69,6 +69,11 @@ class TableSplitterBase(object):
                     try:
                         # See if the area spans multiple cells
                         end_col, end_row = self.span_map[(col, row)]
+                        if end_col < 0:
+                            end_col = num_cols + end_col
+
+                        if end_row < 0:
+                            end_row = num_rows + end_row
                     except KeyError:
                         # By default, area is just a single cell
                         end_col = col
@@ -85,14 +90,8 @@ class TableSplitterBase(object):
         vlines, hlines):
         upper_left_x = vlines[cellx_start]
         upper_left_y = hlines[celly_start]
-        if cellx_end == -1:
-            lower_right_x = vlines[-1]
-        else:
-            lower_right_x = vlines[cellx_end + 1]
-        if celly_end == -1:
-            lower_right_y = hlines[-1]
-        else:
-            lower_right_y = hlines[celly_end + 1]
+        lower_right_x = vlines[cellx_end + 1]
+        lower_right_y = hlines[celly_end + 1]
                     
         return (upper_left_x, upper_left_y, lower_right_x, lower_right_y)
 
