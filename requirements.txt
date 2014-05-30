@@ -1,6 +1,3 @@
-pillow
-blinker
-peewee
-six
-restless
-flask
+--index-url https://pypi.python.org/simple/
+
+-e .
