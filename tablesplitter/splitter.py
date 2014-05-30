@@ -11,7 +11,13 @@ from tablesplitter.util import (bufrange, threshold, getbbox_invert,
     merge_proximate, cell_basename, md5sum)
 
 
+class SplitterRegistry(dict):
+    def register(self, splitter_cls):
+        self[splitter_cls.name] = splitter_cls
+
+
 class TableSplitterBase(object):
+    name = "__base__"
     transforms = {}
     span_map = {}
 
@@ -79,8 +85,14 @@ class TableSplitterBase(object):
         vlines, hlines):
         upper_left_x = vlines[cellx_start]
         upper_left_y = hlines[celly_start]
-        lower_right_x = vlines[cellx_end + 1]
-        lower_right_y = hlines[celly_end + 1]
+        if cellx_end == -1:
+            lower_right_x = vlines[-1]
+        else:
+            lower_right_x = vlines[cellx_end + 1]
+        if celly_end == -1:
+            lower_right_y = hlines[-1]
+        else:
+            lower_right_y = hlines[celly_end + 1]
                     
         return (upper_left_x, upper_left_y, lower_right_x, lower_right_y)
 
@@ -108,17 +120,21 @@ class TableSplitterBase(object):
 
 
 class MSTableSplitter(TableSplitterBase):
+    name = "ms"
+
     # Define areas that span multiple cells.
     # Keys are start x, y.  Values are end x, y.
+    # You can specify "-1" for the last cell to represent the last
+    # cell.
     span_map = {
         (0, 0): (1, 0),
-        (2, 0): (16, 0),
+        (2, 0): (-1, 0),
         (0, 1): (1, 1),
-        (2, 1): (16, 1),
+        (2, 1): (-1, 1),
         (0, 2): (1, 2),
-        (2, 3): (16, 3),
+        (2, 3): (-1, 3),
         (0, 4): (1, 4),
-        (2, 4): (16, 4),
+        (2, 4): (-1, 4),
     }
 
     transforms = {
@@ -220,3 +236,6 @@ class MSTableSplitter(TableSplitterBase):
                 self._vlines.pop()
 
             return self._vlines
+
+registry = SplitterRegistry()
+registry.register(MSTableSplitter)

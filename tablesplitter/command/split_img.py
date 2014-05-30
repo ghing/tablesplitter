@@ -2,7 +2,7 @@ from tablesplitter.command.base import SplitterCommand
 
 from tablesplitter.conf import settings
 from tablesplitter.models import ImageFile, SplitFile
-from tablesplitter.splitter import MSTableSplitter
+from tablesplitter.splitter import registry 
 from tablesplitter.signal import split_image, detect_rows, detect_columns
 
 
@@ -51,8 +51,10 @@ class Command(SplitterCommand):
         super(Command, cls).add_arguments(parser)
         parser.add_argument("--output-dir", dest="output_dir", action="store",
             default=settings.SPLIT_DIR)
+        parser.add_argument("--splitter", default=settings.DEFAULT_SPLITTER)
 
     def run(self, args):
-        splitter = MSTableSplitter(args.input_filename)
+        splitter_cls = registry[args.splitter]
+        splitter = splitter_cls(args.input_filename)
         splitter.split(args.output_dir, min_length=args.min_hline_length,
             max_gap=args.max_gap, buf=args.buffer)
