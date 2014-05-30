@@ -13,7 +13,7 @@
 <img src="{{ cell.image_url }}">
 
 <h3>Text versions</h3>
-{% if cell.texts.count %}
+{% if cell.texts.count() %}
 <p>Most common text: {{ cell.most_common_text|first }}</p>
 <ul>
     {% for text in cell.texts %}
