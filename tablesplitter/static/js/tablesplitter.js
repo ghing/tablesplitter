@@ -33,6 +33,8 @@
   });
 
   var CellImageView = TableSplitter.CellImageView = Backbone.View.extend({
+    className: 'cell-entry-img',
+
     initialize: function(options) {
       this.collection.on('sync', this.render, this);
     },
@@ -58,6 +60,10 @@
   var TranscriptionFormView = TableSplitter.TranscriptionFormView = Backbone.View.extend({
     tagName: 'form',
 
+    attributes: {
+      'role': 'form'
+    },
+
     events: {
       'submit': 'handleSubmit'
     },
@@ -68,8 +74,12 @@
     },
 
     render: function() {
-      $('<input name="text" id="text" type="text">').appendTo(this.$el);
-      $('<button type="submit">Submit</button>').appendTo(this.$el);
+      var formHtml = '<div class="form-group">' +
+        '<label for="text">Enter cell text</label>' +
+        '<input name="text" id="text" type="text" class="form-control">' +
+        '</div>' +
+        '<button type="submit">Submit</button>'; 
+      $(formHtml).appendTo(this.$el);
       return this;
     },
 

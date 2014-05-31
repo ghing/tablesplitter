@@ -13,3 +13,10 @@ ul.projects, ul.source-files, ul.cells {
   display: block;
   max-width: 100%;
 }
+
+.cell-entry-img img {
+  border: solid 1px;
+  padding: 2px;
+  display: block;
+  margin-bottom: 10px;
+}
