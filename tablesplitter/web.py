@@ -1,7 +1,7 @@
 from flask import (Flask, abort, render_template, send_from_directory, request,
                    flash, redirect, url_for)
 
-from tablesplitter.api import CellResource, TextResource
+from tablesplitter.api import CellResource, TextResource, ProjectResource
 from tablesplitter.conf import settings
 from tablesplitter.models import ImageFile, Project, SourceFile, SplitFile, Text
 
@@ -92,3 +92,4 @@ def image(image_type, filename):
 
 CellResource.add_url_rules(app, rule_prefix='/api/cells/')
 TextResource.add_url_rules(app, rule_prefix='/api/text/')
+ProjectResource.add_url_rules(app, rule_prefix='/api/projects/')

@@ -1,8 +1,15 @@
 from peewee import JOIN_LEFT_OUTER, fn
 from restless.fl import FlaskResource
-from restless.utils import json
+from restless.preparers import FieldsPreparer
+from restless.serializers import JSONSerializer 
 
-from tablesplitter.models import SplitFile, Text
+from tablesplitter.conf import settings
+from tablesplitter.models import SplitFile, Text, Project
+
+
+class FixedJSONSerializer(JSONSerializer):
+    def deserialize(self, body):
+        return super(FixedJSONSerializer, self).deserialize(body.decode("utf-8"))
 
 
 class ModelResource(FlaskResource):
@@ -15,13 +22,13 @@ class ModelResource(FlaskResource):
 
 
 class CellResource(ModelResource):
-    fields = {
+    preparer = FieldsPreparer(fields = {
         'id': 'id',
         'source': 'source.id',
         'image_url': 'image_url',
         'box': 'box',
         'text_count': 'count',
-    }
+    })
 
     model = SplitFile
 
@@ -44,11 +51,12 @@ class CellResource(ModelResource):
 
 
 class TextResource(ModelResource):
-    fields = {
-        'id': 'id',
+    preparer = FieldsPreparer(fields = {
+        'name': 'id',
         'source': 'source.id',
         'text': 'text',
-    }
+    })
+    serializer = FixedJSONSerializer()
 
     model = Text
 
@@ -60,5 +68,16 @@ class TextResource(ModelResource):
         return Text.create(source=source, method='manual',
             text=self.data['text'], user_id=self.data['user_id'])
 
-    def raw_deserialize(self, body):
-        return json.loads(body.decode("utf-8"))
+
+
+class ProjectResource(ModelResource):
+    preparer = FieldsPreparer(fields = {
+        'id': 'id',
+        'name': 'name',
+        'slug': 'slug',
+        'instructions': 'instructions',
+    })
+
+    serializer = FixedJSONSerializer()
+
+    model = Project 
