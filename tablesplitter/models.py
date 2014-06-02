@@ -8,7 +8,7 @@ from PIL import Image
 from tablesplitter.conf import settings
 from tablesplitter.util import slugify
 
-db = SqliteDatabase('tablesplitter.db')
+db = SqliteDatabase(settings.DATABASE)
 
 
 class BaseModel(Model):
