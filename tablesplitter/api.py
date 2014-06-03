@@ -3,7 +3,7 @@ from restless.fl import FlaskResource
 from restless.preparers import FieldsPreparer
 from restless.serializers import JSONSerializer 
 
-from tablesplitter.models import SplitFile, Text, Project
+from tablesplitter.models import SplitFile, Text, Project, ImageFile
 
 
 class FixedJSONSerializer(JSONSerializer):
@@ -13,8 +13,12 @@ class FixedJSONSerializer(JSONSerializer):
 
 class ModelResource(FlaskResource):
     def list(self):
-        limit = self.request.args.get('limit', 20)
-        return self.model.select().limit(limit)
+        objs = self.model.select()
+        limit = self.request.args.get('limit')
+        if limit:
+            objs = objs.limit(limit)
+
+        return objs
 
     def detail(self, pk):
         return self.model.get(self.model.id == pk)
@@ -34,6 +38,7 @@ class CellResource(ModelResource):
     def list(self):
         limit = self.request.args.get('limit', 20)
         text_lt = self.request.args.get('text_lt')
+        no_accepted = 'no_accepted' in self.request.args
         random = 'random' in self.request.args
 
         objects = SplitFile.select(SplitFile,
@@ -43,6 +48,8 @@ class CellResource(ModelResource):
         if text_lt is not None:
             text_lt = int(text_lt)
             objects = objects.having(fn.Count(Text.id) < text_lt)
+        if no_accepted:
+            objects= objects.where(Text.accepted == False)
         if random:
             objects = objects.order_by(fn.Random())
 
@@ -51,6 +58,7 @@ class CellResource(ModelResource):
 
 class TextResource(ModelResource):
     preparer = FieldsPreparer(fields = {
+        'id': 'id',
         'source': 'source.id',
         'text': 'text',
         'accepted': 'accepted',
@@ -62,6 +70,16 @@ class TextResource(ModelResource):
     def is_authenticated(self):
         return True
 
+    def list(self):
+        objs = super(TextResource, self).list()
+
+        image_file_id = self.request.args.get('image_file')
+        if image_file_id:
+            image_file = ImageFile.get(ImageFile.id == image_file_id)
+            objs = objs.join(SplitFile).where(SplitFile.source == image_file)
+
+        return objs
+
     def create(self):
         source = SplitFile.get(SplitFile.id == self.data['source'])
         return Text.create(source=source, method='manual',
@@ -69,7 +87,7 @@ class TextResource(ModelResource):
 
     def update(self, pk):
         try:
-            text = Text.objects.get(Text.id == pk)
+            text = Text.get(Text.id == pk)
         except Text.DoesNotExist:
             text = Text()
 

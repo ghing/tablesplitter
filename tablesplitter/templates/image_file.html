@@ -24,12 +24,12 @@
         <img src="{{ cell.image_url }}">
 
         <h4>Text versions</h4>
-        <p><a href="{{ url_for('cell', id=cell.id) }}#add-text" class="btn btn-default">Add text version</a></p>
+        <p><a href="{{ url_for('cell', id=cell.id) }}?next={{ url_for('image_file', id=image_file.id) }}%23cell-{{ cell.id }}#add-text" class="btn btn-default">Add text version</a></p>
         {% if cell.texts.count() %}
         <p>Most common text: {{ cell.most_common_text|first }}</p>
         <ul>
             {% for text in cell.texts %}
-            <li>
+            <li class="cell-text" data-id="{{ text.id }}">
                 {% if text.text == "" %}
                 (Empty)
                 {% else %}
@@ -39,7 +39,7 @@
                 {% if text.accepted %}
                 <span class="label label-success">Accepted</span>
                 {% elif not cell.accepted_text and not text.accepted %}
-                <a href="{{ url_for('accept_text', id=text.id) }}?accepted=true&next={{ url_for('image_file', id=image_file.id) }}#cell-{{ cell.id }}" class="btn btn-default btn-sm"><span class="glyphicon glyphicon glyphicon-thumbs-up"></span>
+                <a href="{{ url_for('accept_text', id=text.id) }}?accepted=true&next={{ url_for('image_file', id=image_file.id) }}#cell-{{ cell.id }}" class="btn btn-default btn-sm btn-accept"><span class="glyphicon glyphicon glyphicon-thumbs-up"></span>
                     Accept</a>
                 {% endif %}
             </li>
@@ -51,4 +51,26 @@
     </ul>
   </div>
 </div>
+{% endblock %}
+
+{% block footerscripts %}
+<script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.6.0/underscore-min.js"></script> 
+<script src="//cdnjs.cloudflare.com/ajax/libs/backbone.js/1.1.2/backbone-min.js"></script>
+<script src="{{ url_for('static', filename='js/tablesplitter.js') }}"></script>
+<script>
+var texts = new TableSplitter.Texts(null, {
+    imageId: {{ image_file.id }}
+});
+texts.on('sync', function() {
+    $('.cell-text').each(function() {
+        var $el = $(this);
+        var view = new TableSplitter.AcceptTextView({
+            collection: texts,
+            model: texts.get($el.data('id')),
+            el: $el
+        });
+    });
+});
+texts.fetch();
+</script>
 {% endblock %}

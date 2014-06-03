@@ -10,7 +10,7 @@
   var Cells = TableSplitter.Cells = BaseCollection.extend({
     url: function() {
       var url = '/api/cells/';
-      var queryParams = _.pick(this.options, 'limit', 'text_lt', 'random');
+      var queryParams = _.pick(this.options, 'limit', 'text_lt', 'random', 'no_accepted');
       
       if (!_.isEmpty(queryParams)) {
         url += '?'; 
@@ -28,8 +28,31 @@
     }
   });
 
+  var Text = Backbone.Model.extend({
+    url: function() {
+      var collectionUrl = _.result(this.collection, 'url');
+      var url = collectionUrl.split('?')[0];
+      if (this.id) {
+        url = url + this.id + '/';  
+      }
+      return url; 
+    }
+  });
+
   var Texts = TableSplitter.Texts = BaseCollection.extend({
-    url: '/api/text/'
+    model: Text,
+
+    url: function() {
+      var url = '/api/text/';
+      if (this.options.imageId) {
+        url = url + "?image_file=" + this.options.imageId; 
+      }
+      return url;
+    },
+
+    initialize: function(models, options) {
+      this.options = options || {};
+    }
   });
 
   var CellImageView = TableSplitter.CellImageView = Backbone.View.extend({
@@ -122,11 +145,38 @@
     }
   });
 
+  TableSplitter.AcceptTextView = Backbone.View.extend({
+    events: {
+      'click .btn-accept': 'clickAccept'
+    },
+
+    initialize: function() {
+      this.model.on('sync', this.render, this);
+    },
+
+    render: function() {
+      if (this.model.get('accepted')) {
+        this.$('.btn-accept').hide();
+        if (!this.$('.label-success').length) {
+          $('<span class="label label-success">Accepted</span>').appendTo(this.$el);
+        }
+      }
+      return this;
+    },
+
+    clickAccept: function(evt) {
+      evt.preventDefault();
+      this.model.set('accepted', true);
+      this.model.save();
+    }
+  });
+
   TableSplitter.App = function(options) {
     this.collection = new Cells(null, {
       limit: 1,
       text_lt: 3,
-      random: true
+      random: true,
+      no_accepted: true
     });
 
     this.imgView = new CellImageView({collection: this.collection});

@@ -105,6 +105,7 @@ def cell(id):
     source_file = cell.source.source
     project = source_file.project
     label = "Row {}, Column {}".format(cell.row, cell.column)
+    next_view = get_redirect_target()
     breadcrumbs = [
         (project.name, url_for('project', slug=project.slug)),
         (source_file.filename,
@@ -112,7 +113,8 @@ def cell(id):
         (cell.source.filename, url_for('image_file', id=cell.source.id)),
         (label, None),
     ]
-    return render_template('cell.html', cell=cell, breadcrumbs=breadcrumbs)
+    return render_template('cell.html', cell=cell, breadcrumbs=breadcrumbs,
+        next=next_view)
 
 @app.route('/cells/<id>/add-text', methods=['POST'])
 def add_cell_text(id):
@@ -122,7 +124,7 @@ def add_cell_text(id):
             text=text, user_id=request.form['user_id'])
     flash("Text version '{}' added.".format(text), 'success')
 
-    return redirect(url_for('cell', id=id))
+    return redirect_back(url_for('cell', id=id))
 
 @app.route('/text/<id>/accept')
 def accept_text(id):
