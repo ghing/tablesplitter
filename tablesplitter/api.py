@@ -3,7 +3,6 @@ from restless.fl import FlaskResource
 from restless.preparers import FieldsPreparer
 from restless.serializers import JSONSerializer 
 
-from tablesplitter.conf import settings
 from tablesplitter.models import SplitFile, Text, Project
 
 
@@ -52,9 +51,9 @@ class CellResource(ModelResource):
 
 class TextResource(ModelResource):
     preparer = FieldsPreparer(fields = {
-        'name': 'id',
         'source': 'source.id',
         'text': 'text',
+        'accepted': 'accepted',
     })
     serializer = FixedJSONSerializer()
 
@@ -68,6 +67,18 @@ class TextResource(ModelResource):
         return Text.create(source=source, method='manual',
             text=self.data['text'], user_id=self.data['user_id'])
 
+    def update(self, pk):
+        try:
+            text = Text.objects.get(Text.id == pk)
+        except Text.DoesNotExist:
+            text = Text()
+
+        source = SplitFile.get(SplitFile.id == self.data['source'])
+        text.source = source
+        text.text = self.data['text']
+        text.accepted = self.data['accepted']
+        text.save()
+        return text
 
 
 class ProjectResource(ModelResource):

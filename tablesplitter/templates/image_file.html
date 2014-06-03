@@ -3,6 +3,9 @@
 <div class="row">
   <div class="col-md-12">
     <h1>{{image_file.filename}}</h1>
+
+    <div><a href="{{ url_for('image_csv', id=image_file.id) }}" class="btn btn-default"><span class="glyphicon glyphicon-download"></span> Download CSV</a></div>
+
     <a href="{{ image_file.image_url }}"><img src="{{ image_file.thumbnail_url }}"></a>
     <h2>Cells</h2>
     <ul class="cells">
@@ -21,12 +24,25 @@
         <img src="{{ cell.image_url }}">
 
         <h4>Text versions</h4>
-        <p><a href="{{ url_for('cell', id=cell.id) }}#add-text">Add text version</a></p>
+        <p><a href="{{ url_for('cell', id=cell.id) }}#add-text" class="btn btn-default">Add text version</a></p>
         {% if cell.texts.count() %}
         <p>Most common text: {{ cell.most_common_text|first }}</p>
         <ul>
             {% for text in cell.texts %}
-            <li>{{ text.text }}</li>
+            <li>
+                {% if text.text == "" %}
+                (Empty)
+                {% else %}
+                {{ text.text }}
+                {% endif %}
+
+                {% if text.accepted %}
+                <span class="label label-success">Accepted</span>
+                {% elif not cell.accepted_text and not text.accepted %}
+                <a href="{{ url_for('accept_text', id=text.id) }}?accepted=true&next={{ url_for('image_file', id=image_file.id) }}#cell-{{ cell.id }}" class="btn btn-default btn-sm"><span class="glyphicon glyphicon glyphicon-thumbs-up"></span>
+                    Accept</a>
+                {% endif %}
+            </li>
             {% endfor %}
         </ul>
         {% endif %}

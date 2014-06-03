@@ -2,7 +2,7 @@ from datetime import datetime
 import os.path
 
 from peewee import (Model, SqliteDatabase, CharField, DateTimeField,
-                    IntegerField, ForeignKeyField, TextField, fn)
+                    IntegerField, ForeignKeyField, TextField, BooleanField, fn)
 from PIL import Image
 
 from tablesplitter.conf import settings
@@ -105,6 +105,16 @@ class ImageFile(WebImageMixin, File):
         except IndexError:
             return ""
 
+    def get_data(self):
+        data = []
+        for row in range(self.num_rows):
+            row_data = []
+            for col in range(self.num_columns):
+                row_data.append(self.get_cell_text(col, row))
+            
+            data.append(row_data)
+        return data
+
 
 class SplitFile(WebImageMixin, File):
     IMAGE_DIR = settings.SPLIT_DIR
@@ -142,7 +152,17 @@ class SplitFile(WebImageMixin, File):
             return None
 
     @property
+    def accepted_text(self):
+        try:
+            return self.texts.select().where(Text.accepted == True).get()
+        except Text.DoesNotExist:
+            return None
+
+    @property
     def needs_review(self):
+        if self.texts.select().where(Text.accepted == True).count() >= 1:
+            return False
+
         return self.distinct_texts.count() != 1
 
 class Text(BaseModel):
@@ -155,3 +175,4 @@ class Text(BaseModel):
     source = ForeignKeyField(SplitFile, related_name='texts')
     user_id = CharField()
     text = TextField()
+    accepted = BooleanField(default=False)
