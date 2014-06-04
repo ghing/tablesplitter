@@ -61,7 +61,7 @@
 var texts = new TableSplitter.Texts(null, {
     imageId: {{ image_file.id }}
 });
-texts.on('sync', function() {
+texts.once('sync', function() {
     $('.cell-text').each(function() {
         var $el = $(this);
         var view = new TableSplitter.AcceptTextView({
