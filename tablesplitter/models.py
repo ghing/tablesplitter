@@ -100,10 +100,14 @@ class ImageFile(WebImageMixin, File):
     def get_cell_text(self, column, row):
         try:
             cell_obj = self.cells.where(SplitFile.row == row).where(SplitFile.column == column)[0]
+            text = cell_obj.accepted_text
+            if text is not None:
+                return text
+
             text, count = cell_obj.most_common_text
             return text
         except IndexError:
-            return ""
+            return None 
 
     def get_data(self):
         data = []
@@ -154,7 +158,7 @@ class SplitFile(WebImageMixin, File):
     @property
     def accepted_text(self):
         try:
-            return self.texts.select().where(Text.accepted == True).get()
+            return self.texts.select().where(Text.accepted == True).get().text
         except Text.DoesNotExist:
             return None
 
