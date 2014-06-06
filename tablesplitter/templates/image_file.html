@@ -10,7 +10,7 @@
     <h2>Cells</h2>
     <ul class="cells">
       {% for cell in image_file.cells %}
-      <li class="cell" id="cell-{{ cell.id }}">
+      <li class="cell" id="cell-{{ cell.id }}" data-id="{{ cell.id }}">
         <h3>Row {{ cell.row }}, Column {{ cell.column }}</h3>
 
         {% if cell.needs_texts %}
@@ -24,17 +24,16 @@
         <img src="{{ cell.image_url }}">
 
         <h4>Text versions</h4>
-        <p><a href="{{ url_for('cell', id=cell.id) }}?next={{ url_for('image_file', id=image_file.id) }}%23cell-{{ cell.id }}#add-text" class="btn btn-default">Add text version</a></p>
+        {# Hide this link for now #}
+        {# <p><a href="{{ url_for('cell', id=cell.id) }}?next={{ url_for('image_file', id=image_file.id) }}%23cell-{{ cell.id }}#add-text" class="btn btn-default">Add text version</a></p> #}
         {% if cell.texts.count() %}
+        {% if cell.most_common_text %}
         <p>Most common text: {{ cell.most_common_text|first }}</p>
-        <ul>
+        {% endif %}
+        <ul class="cells">
             {% for text in cell.texts %}
             <li class="cell-text" data-id="{{ text.id }}">
-                {% if text.text == "" %}
-                (Empty)
-                {% else %}
-                {{ text.text }}
-                {% endif %}
+                <pre class="cell-text-value">{% if text.text == "" %}(Empty){% else %}{{ text.text }}{% endif %}</pre>
 
                 {% if text.accepted %}
                 <span class="label label-success">Accepted</span>
@@ -59,18 +58,36 @@
 <script src="{{ url_for('static', filename='js/tablesplitter.js') }}"></script>
 <script>
 var texts = new TableSplitter.Texts(null, {
-    imageId: {{ image_file.id }}
+  imageId: {{ image_file.id }}
 });
 texts.once('sync', function() {
-    $('.cell-text').each(function() {
-        var $el = $(this);
-        var view = new TableSplitter.AcceptTextView({
-            collection: texts,
-            model: texts.get($el.data('id')),
-            el: $el
-        });
+  $('.cell-text').each(function() {
+    var $el = $(this);
+    var model = texts.get($el.data('id'));
+    var acceptView = new TableSplitter.AcceptTextView({
+      collection: texts,
+      model: model, 
+      el: $el
     });
+    var editView = new TableSplitter.EditTextView({
+      model: model, 
+      el: $el
+    });
+  });
 });
 texts.fetch();
+
+$('.cell').each(function() {
+  var $el = $(this);
+  var model = new TableSplitter.Cell({id: $el.data('id')});
+  var cellView = new TableSplitter.CellView({
+    el: $el,
+    model: model
+  });
+});
+
+var cellNavView = new TableSplitter.CellNavigationView({
+    el: $('.cells')
+});
 </script>
 {% endblock %}

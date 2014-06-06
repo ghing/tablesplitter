@@ -1,17 +1,38 @@
 body { padding-top: 70px; }
 
-ul.projects, ul.source-files, ul.cells {
+ul.projects, ul.source-files, ul.cells, ul.texts {
   padding-left: 0;
   list-style: none;
 }
 
 .cell {
+  padding: 4px;
   margin-bottom: 10px;
+  overflow: hidden;
+}
+
+.cell.selected {
+  border: 1px solid #000;
+  border-radius: 4px;
 }
 
 .cell img {
   display: block;
   max-width: 100%;
+}
+
+.cell-text {
+  clear: both;
+}
+
+.cell-text pre {
+  display: inline-block;
+  float: left;
+}
+
+.cell-text .label,
+.cell-text .btn {
+  margin-left: 8px;
 }
 
 .cell-entry-img img {
