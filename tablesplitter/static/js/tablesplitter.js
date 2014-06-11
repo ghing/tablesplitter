@@ -4,6 +4,8 @@
   var KEYCODE_ESC = 27;
   var KEYCODE_N = 110;
   var KEYCODE_P = 112;
+  var KEYCODE_E = 101;
+  var KEYCODE_A = 97;
 
   // Models
 
@@ -166,6 +168,7 @@
 
     initialize: function() {
       this.model.on('sync', this.render, this);
+      Backbone.on('request:accept:text', this.handleRequestAccept, this);
     },
 
     render: function() {
@@ -177,11 +180,22 @@
       }
       return this;
     },
+    
+    _accept: function() {
+      this.model.set('accepted', true);
+      this.model.save();
+    },
 
     clickAccept: function(evt) {
       evt.preventDefault();
-      this.model.set('accepted', true);
-      this.model.save();
+      this._accept();
+    },
+
+    handleRequestAccept: function(text) {
+      if ((text.id && this.model.id === text.id) || 
+          (text && this.model.id === text)) {
+        this._accept();
+      }
     }
   });
 
@@ -202,6 +216,7 @@
     initialize: function() {
       this._editing = false;
       $(window).on('keyup', _.bind(this.handleKeyup, this));
+      Backbone.on('request:edit:text', this.handleRequestEdit, this);
       this.render();
     },
 
@@ -238,6 +253,7 @@
       this._editing = true;
       Backbone.trigger('edit:text:start', this.model);
       this.render();
+      this._getForm().find('input[type="text"]').focus();
     },
 
     _endEdit: function() {
@@ -248,7 +264,6 @@
 
     handleClickText: function(evt) {
       this._startEdit();
-      this._getForm().find('input[type="text"]').focus();
     },
 
     handleSubmit: function(evt) {
@@ -266,6 +281,12 @@
     handleKeyup: function(evt) {
       if (this._editing && evt.keyCode === KEYCODE_ESC) {
         this._endEdit();
+      }
+    },
+
+    handleRequestEdit: function(id) {
+      if (this.model.id === id) {
+        this._startEdit();
       }
     }
   });
@@ -301,6 +322,7 @@
     initialize: function() {
       this._editingText = false;
       this._selectedCellId = null;
+      this._lastEditedText = null;
       $(window).on('keypress', _.bind(this.handleKeypress, this));
       Backbone.on('select:cell', this.handleSelectCell, this);
       Backbone.on('edit:text:start', this.handleStartEditText, this);
@@ -321,6 +343,13 @@
       else if (evt.which === KEYCODE_P && !this._editingText) {
         this._switchToCell(this._getPrevEl());
       }
+      else if (evt.which === KEYCODE_E && !this._editingText) {
+        evt.preventDefault();
+        this._requestEdit();
+      }
+      else if (evt.which === KEYCODE_A && !this._editingText) {
+        this._requestAccept();
+      }
     },
 
     _switchToCell: function($el) {
@@ -330,6 +359,7 @@
         Backbone.trigger('select:cell', $el.data('id'));
         pos = $el.position();
         window.scrollTo(0, pos.top);
+        this._lastEditedText = null;
       }
     },
 
@@ -355,12 +385,48 @@
       }
     },
 
+    _requestEdit: function() {
+      var textId;
+
+      if (!this._selectedCellId) {
+        return;
+      }
+
+      Backbone.trigger('request:edit:text', this._getFirstTextId());
+    },
+
+    _requestAccept: function() {
+      var text;
+
+      if (this._lastEditedText) {
+        text = this._lastEditedText; 
+      }
+      else if (this._selectedCellId) {
+        text = this._getFirstTextId();
+      }
+
+      if (!text) {
+        return;
+      }
+
+      console.debug(text);
+
+      Backbone.trigger('request:accept:text', text);
+    },
+
+    _getFirstTextId: function() {
+       return this.$('#cell-' + this._selectedCellId)
+                   .find('.cell-text')
+                   .first().data('id');
+    },
+
     handleStartEditText: function() {
       this._editingText = true;
     },
 
-    handleEditText: function() {
+    handleEditText: function(text) {
       this._editingText = false;
+      this._lastEditedText = text;
     }
   });
 

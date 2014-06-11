@@ -35,6 +35,10 @@ ul.projects, ul.source-files, ul.cells, ul.texts {
   margin-left: 8px;
 }
 
+.cell-text form {
+  display: inline-block;
+}
+
 .cell-entry-img img {
   border: solid 1px;
   padding: 2px;
