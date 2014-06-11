@@ -1,1 +1,2 @@
+recursive-include tablesplitter/templates *
 recursive-include tablesplitter/static *
