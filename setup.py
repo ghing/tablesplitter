@@ -14,6 +14,7 @@ setup(name='Tablesplitter',
       author_email='geoffhing@gmail.com',
       url='https://github.com/ghing/tablesplitter',
       packages=find_packages(),
+      include_package_data=True,
       scripts=['bin/tsplit.py'],
       install_requires=[
           'pillow>=2.4',
